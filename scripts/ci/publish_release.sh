@@ -9,6 +9,10 @@ set -euo pipefail
     exit 1
 }
 
+# Re-check the tag immediately before publishing: signed, annotated, on the default branch, and
+# pointing at the commit this run built (CIPH-HYPERION-28).
+bash "$(dirname "${BASH_SOURCE[0]}")/verify_release_tag.sh"
+
 asset_dir=${1:-release}
 assets=()
 for name in hypc-static-linux hypc-static-linux-arm hypc-macos hypc-windows.exe hypjson.js SHA256SUMS; do
