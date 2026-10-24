@@ -25,8 +25,12 @@ read -r ref_type tag_sha <<< "$ref"
     fail "$RELEASE_TAG is a lightweight tag. Release tags must be signed and annotated (git tag -s)."
 
 tag=$(gh api "repos/$GH_REPO/git/tags/$tag_sha" \
-    --jq '.object.type + " " + .object.sha + " " + (.verification.verified | tostring) + " " + .verification.reason')
-read -r target_type commit_sha verified reason <<< "$tag"
+    --jq '.tag + " " + .object.type + " " + .object.sha + " " + (.verification.verified | tostring) + " " + .verification.reason')
+read -r tag_name target_type commit_sha verified reason <<< "$tag"
+# The signed name inside the tag object must be this release: otherwise a validly signed tag object
+# made for another version could be pushed again under a new tag name.
+[[ $tag_name == "$RELEASE_TAG" ]] ||
+    fail "The tag object behind $RELEASE_TAG is signed as $tag_name. Create a new signed tag named $RELEASE_TAG."
 [[ $target_type == commit ]] || fail "$RELEASE_TAG points at a $target_type, not a commit."
 [[ $commit_sha == "$GITHUB_SHA" ]] ||
     fail "$RELEASE_TAG points at $commit_sha, but this run built $GITHUB_SHA."

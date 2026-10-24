@@ -71,10 +71,9 @@ If a tag or release is wrong, fix it on ``main`` and release the next patch vers
        Remove different variants of the same name manually before using the output.
 
 ### Upload Release Artifacts and Publish Binaries
- - [ ] Switch to the tag that archives have to be created for.
- - [ ] Create the ``prerelease.txt`` file: (``echo -n > prerelease.txt``).
- - [ ] Run ``scripts/create_source_tarball.sh`` while being on the tag to create the source tarball. This will create the tarball in a directory called ``upload``.
- - [ ] Take the tarball from the upload directory (its name should be ``hyperion_x.x.x.tar.gz``, otherwise ``prerelease.txt`` was missing in the step before) and upload the source tarball to the release page.
+ - [ ] Do not upload files to the release by hand: a file built on a workstation has no build provenance and is not
+       covered by ``SHA256SUMS``. GitHub attaches source archives generated from the signed tag. If a separate source
+       tarball is needed again, build it from the tag and attest it in the release job, like the binaries.
  - [ ] Wait for GitHub Actions to publish the tagged build's release assets after all checks pass and the ``release`` environment is approved.
        Verify that the release contains ``hypc-windows.exe``, ``hypc-macos``, ``hypc-static-linux`` (AMD64),
        ``hypc-static-linux-arm`` (ARM64), ``hypjson.js`` and ``SHA256SUMS``.
