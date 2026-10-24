@@ -1,0 +1,85 @@
+// Real vectors from xmssverify.hyp (theQRL/qrllib XmssFast, SHA2-256, tree height 4, leaf index 1).
+contract C {
+    bytes signature;
+
+    function change(bytes memory pk) internal returns (bytes memory) {
+        signature = hex"00";
+        return pk;
+    }
+
+    function f(bytes memory m, bytes memory s, bytes memory pk) public returns (bool, bool, bool) {
+        signature = s;
+        bool beforeChange = xmssverify(m, signature, pk);
+        // Copy the storage signature before the public key argument overwrites it.
+        bool duringChange = xmssverify(m, signature, change(pk));
+        assert(beforeChange == duringChange);
+        return (beforeChange, duringChange, xmssverify(m, signature, pk));
+    }
+
+    function run(bool corrupt) public returns (bool, bool, bool) {
+        bytes memory s = signatureFixture();
+        if (corrupt)
+            s[40] = bytes1(uint8(s[40]) ^ 1);
+        return f("The quick brown fox jumps over the lazy dog", s, publicKeyFixture());
+    }
+
+    function publicKeyFixture() internal pure returns (bytes memory) {
+        return
+            hex"00020086f228f3473702ed99a3f86abd91c2110d53acca6ea28b7c9e03dbd999076c0b531811e0e94bef5af4fa3e120ba1c5759eec03469fdf3c5face9124bbb"
+            hex"d0a3a2";
+    }
+
+    function signatureFixture() internal pure returns (bytes memory) {
+        return
+            hex"000000014d2a916b0fd94519aa9cd9096b07a1145389c78c3f0d65f9f46ec28cfc0968c578bdf8223d95adc9d0cafd6341a8bb8ee4a3b7d0fcb54aeb276b0182"
+            hex"f198de0f710b911d48cd3d73501255c3299152a09d6ba00c5d01df52491a088a317d5cd7513bc47915d146b1edd800cf3816b104b88e109cf408cf6c8d73002d"
+            hex"059fdf779214da59b701bf89ecc990deb5faacbd6b9c249fe11fbd94e8f315ddbfca9b2d35cff405875cf486078690d9e030083598ff1c5b2830a7dc567946eb"
+            hex"72c7691c9b4925a475d7ade83b4711384234b89474322106627215a194679c00e17fbce7d70e3f8bc5bc2ba065469745708cb948265c0a33f02b225cc6e0ba4e"
+            hex"ce23728c8dabe69ced1434a4b8bf6e08d2e86ba3a94467d98390ad2d86cf1d8c17f1061409a72a905e3e694b79118daccef59c246ad8cb16167c64eec0d11bc5"
+            hex"f1cdbd662c2210a1a47258f2af9338b5862582335eea06d45df51ded17b982fe1536f34788bfce50338087e16ed6038a5fc9c9628cff26e1a7c05daa3f1e30b9"
+            hex"342d074b9ce5c7e2bcc3139a3438b42e709ff418c083f78c49b5f0cb25bb01d644e800f59cee309b2ac3a6665f5fdaddebc81b55c73a203dfb07a2c6c3eadedd"
+            hex"6292cd72e4e2b78b0badb67be1c8339923e1665434f15fb1a0325ec30b7f22bf63342938576478a918fa5e7da6d79d9673f0c5cccc25bb600e24be338b1aa329"
+            hex"1b2e842f1966bade11c9b263dc65de5cb867cf4c670280adfdc653c61f7492f6552a1054cad2be6d7dd1093caef5ccb7fa49a9df0fdf4c3b0fb1a2812e208d65"
+            hex"3602c2e8dd6576ee839edf6df1088ba7e6b45a8643aa2abb9c0a26043b85e04f60c390f2535cdb16dff8fca43ff780287a99ddcb6cfac3fc524394a24aed8249"
+            hex"b9415c20ee70973053da199debd18e17001f714aab31c03c012502497e780d9c6b4271872df0be9caaeb424e1fff6d66345ac6315fb6fececc164c034a35c7ba"
+            hex"612caf81cfd06e0d64b9f82df925ea4ba644b33a5b1f8954cf76ae919e8d59a30c203997a47e9e8ed39a04881ac185706b0769f493e5af01785007963bcf2389"
+            hex"f096d9361def31b7e67098577bd79f7e1ea5f105ae6f3e22896c3c2a91bbb4d91977f102d0508498f165d8300a62fa06ab1bc8fad805c5fcb06b8bf211f92269"
+            hex"f37646f0f92e77e2571440922eb509cc073f81a1d810489151e3b34a7d66ce536ee9e7b9af37074a5651b90b72ced555095517e03139d4508364b11e0bdcc84e"
+            hex"317b79b3ca7057d898048eeaef0f78254866c7028d67449cfdd89f8beac218a13748dd23315c8512640697a32c68da5600c655edc4b7505bc3da67574e618e92"
+            hex"8578a643b26098e3e78f974a0d503b154eb7446458759cc22e7e7e6746b4b1f3c7c36799226f0e467dae0f28aa78ed0b65956a5f85933dda5826414dbc001124"
+            hex"f0858c3dd6447b85677ca55dac354b1ff376154fbbce5fc4f49ddb03cad66e8715fd8b046def2d0e3a5b67bd6b1411fb6a04e56fdec0699fe5c52dfe0ea40954"
+            hex"bf05552b69dba6ed882731198dc9f59dedc3cbeb953c3e5e745030faf81b5fc94796ae274532d15bf118b00b03322fc53cd313bdba195e6bf9188e274366ce8f"
+            hex"805c0a2dc51bf1ece8c317f8df6c5669198336dceec95731fee07d0dd944f0b110ee08fa13cb304dd8ddcad7e4ea733728a84e91dc4303120dbb03e705eb9c47"
+            hex"ee3915e9be1251e2c750d6397c187b355bd8d8ca64cacba44b7a3fd41d99099bcd2df4361737cb7a52926c6d14b47177ac249bd1f87f2a29943a2202942a2a8c"
+            hex"ed454b036d48d55549b5ce8dd8aa0198929601566cf37e431dd3e3cd598322f3911fa813027b71feb690d71537183a8a53e29d25987b38fbe04242867cd5d165"
+            hex"cef4e07015d991958b30461788693c3c0e6d093614e735dc45d2b8c034ad3c555ed4e854cc14c523b28b6f99678411dbe7e30bef1a6d81bf12996a3d260ba7fb"
+            hex"f78079178738accba2f3b6269c02534e6754c03a7b3f5766a3acf052bc7642d26dba810a644fc8713686dda805c61c8f3acc5350314290c08eb40e1b8abb583e"
+            hex"7580a4c020f8bdb607ab5a1f8dbe529ceed36479f6b28e74682d237d805fe987e7dc35214bb18fe7dd87743abe8ab716395a94961159f13f11c4af2172f356ea"
+            hex"17ede2441a34d3312f250c68269efeea0a58f40477757880c5d18979fe947724774a6b74c67f906d4d2fc4839f59244ca59a029a242ead8c9e6ebf3e0b69b610"
+            hex"0fab9553dd1459601b1b140e2daff12f6b9ef9b1bbb401ab82a6103e66bad87bcee4bc387e5034b735be6b5b86db1579dcf9fab5a8929b27bab0bf8d9f5ea5a9"
+            hex"a6c731ab0098bd176a978b7992e8b42e82ddba015ff2a5d6f64fbe7e8a303e804e31c29fb49abddb81933e1d3c5448e699c6c794967e1d0d38326642fc47fcac"
+            hex"c367b61fbf244cb6caf6f5b3221affb5064477e2ae5942485553173fad698d121664ffaabcd4cd88f466badf3c0c4e2435229bdc4adc01fcc4fdabb21a3284ba"
+            hex"779fea75a4b166efcc72cd8243fe694f595e01d741910176dcc8a308714fcc386bb971dc61de0e9fe2a57369e2e077a0d7dd0e489107caa4ecf034afde0a99b0"
+            hex"3b4ad8987ae464f10574a77311c057209baaf06f3f136acdcb84110ec97825c813869af9b1d31c86f84d36ff7289969879ff0177172266827f36f9f7fb65817b"
+            hex"92144d1c029a3d4d5f3a4f32ab91b857283ed49950478f627cddfc79beb50ac394b5918cd5520fdb77b11fb61dbcad4065dabc260fb3f293a5411cd2fd60d479"
+            hex"16e15507ecd8df31703cf359dc5ece6939488e7d5f1809bccab46bf179da6a1e8ddb09d3a1fb75f73b14619f792cfdde150103a22c0a153ee70efd01a4aa08de"
+            hex"11840c782af4fe6d88187e06027db87b10d732ecaaef9a6e028ce24cf4868c986e5133a2b72320bc8c7a6570b04ab731ee00f0e974cda7b6712908e8399473b0"
+            hex"e869ac12ebccb00ae1adbea9465beacbbbda7e5727fc7bc1478503b046109495e06a7017d1729a93b7f4f3a5391b17c1e7ac2ff04e636cfb14688a62ec2ccb26"
+            hex"d751c4d9428300ed9039103cbf9b73e2e9f6a0b0abdfa7b2266b872825fb3a69e802bec21236f8a007149444271120eefde0354310e3792c3f54d019db0bc45f"
+            hex"c848bbb6518cb4e8d11e58d649872f9cc19e7f4366b307de81cc1a99a120d06023f23259acd635882bd369b74983c2aa1f982601ce6b6fd424f44ed3a43037ff"
+            hex"ad50cd4c";
+    }
+}
+// ====
+// compileViaYul: also
+// ----
+// run(bool): false -> true, true, false
+// gas ir: 1498980
+// gas irOptimized: 1496100
+// gas legacy: 1499234
+// gas legacyOptimized: 1493933
+// run(bool): true -> false, false, false
+// gas ir: 1486132
+// gas irOptimized: 1482586
+// gas legacy: 1485680
+// gas legacyOptimized: 1480389

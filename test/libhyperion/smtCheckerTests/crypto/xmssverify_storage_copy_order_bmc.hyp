@@ -1,0 +1,21 @@
+contract C {
+    bytes signature;
+
+    function change(bytes memory pk) internal returns (bytes memory) {
+        signature = hex"00";
+        return pk;
+    }
+
+    function f(bytes memory m, bytes memory s, bytes memory pk) public returns (bool, bool, bool) {
+        signature = s;
+        bool beforeChange = xmssverify(m, signature, pk);
+        // Copy the storage signature before the public key argument overwrites it.
+        bool duringChange = xmssverify(m, signature, change(pk));
+        assert(beforeChange == duringChange);
+        return (beforeChange, duringChange, xmssverify(m, signature, pk));
+    }
+}
+// ====
+// SMTEngine: bmc
+// ----
+// Info 6002: BMC: 1 verification condition(s) proved safe! Enable the model checker option "show proved safe" to see all of them.
