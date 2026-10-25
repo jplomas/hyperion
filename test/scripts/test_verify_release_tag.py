@@ -1,4 +1,5 @@
 """Exercise release tag verification against a local fake GitHub CLI."""
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -59,11 +60,11 @@ class ReleaseTagVerificationTests(unittest.TestCase):
             'VERIFIED': 'true', 'REASON': 'valid', 'COMPARE_STATUS': 'identical', 'FAIL_STAGE': '',
         }
         settings.update(overrides)
-        # Braces matter: Bash reads $10 as $1 followed by "0".
-        exports = ''.join(f'export {name}="${{{index + 1}}}"\n' for index, name in enumerate(settings))
+        # Pass the settings in the environment, not as arguments: Windows re-parses command-line
+        # arguments, and the quote in the invalid-tag case shifted every argument after it.
         return subprocess.run(
-            [BASH, '-c', exports + FAKE_GH, 'verify-test', *settings.values()],
-            cwd=self.root, capture_output=True, text=True,
+            [BASH, '-c', FAKE_GH],
+            cwd=self.root, env={**os.environ, **settings}, capture_output=True, text=True,
         )
 
     def api_paths(self):
