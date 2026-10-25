@@ -25,7 +25,13 @@
 #endif
 
 #if defined(__linux) || defined(__APPLE__)
+#include <boost/version.hpp>
+#if (BOOST_VERSION < 108800)
 #include <boost/process.hpp>
+#else
+#define BOOST_PROCESS_VERSION 1
+#include <boost/process/v1/search_path.hpp>
+#endif
 #endif
 
 #include <range/v3/algorithm/any_of.hpp>

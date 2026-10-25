@@ -22,8 +22,9 @@ qrl_policy()
 
 # project name and version should be set after cmake_policy CMP0048
 set(PROJECT_VERSION "0.2.0")
-# OSX target needed in order to support std::visit
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.14")
+# libc++ 22 (Xcode 27) dropped support for deployment targets below macOS 11.0
+# (upstream Solidity c7a15088d0).
+set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0")
 project(hyperion VERSION ${PROJECT_VERSION} LANGUAGES C CXX)
 
 include(TestBigEndian)

@@ -6,16 +6,13 @@
 #include <qrvmc/qrvmc.hpp>
 #include <algorithm>
 #include <cassert>
-#include <string>
 #include <map>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
 namespace qrvmc
 {
-/// The string of bytes.
-using bytes = std::basic_string<uint8_t>;
-
 /// Extended value (with original value and access flag) for account storage.
 struct StorageValue
 {
@@ -76,6 +73,59 @@ struct MockedAccount
 class MockedHost : public Host
 {
 public:
+    MockedHost() = default;
+
+    /// Copy constructor.
+    ///
+    /// Entries of recorded_calls with non-empty input keep pointers into
+    /// m_recorded_calls_inputs of the source object. Re-point them at this
+    /// object's own copies of the inputs so they stay valid independently
+    /// of the source. Note that call_result is copied as-is: both objects
+    /// then share its user-owned output buffer, which MockedHost never
+    /// frees, so the buffer's lifetime remains the user's responsibility.
+    MockedHost(const MockedHost& other)
+      : Host{other},
+        accounts{other.accounts},
+        tx_context{other.tx_context},
+        block_hash{other.block_hash},
+        call_result{other.call_result},
+        recorded_blockhashes{other.recorded_blockhashes},
+        recorded_account_accesses{other.recorded_account_accesses},
+        recorded_calls{other.recorded_calls},
+        recorded_logs{other.recorded_logs},
+        m_recorded_calls_inputs{other.m_recorded_calls_inputs}
+    {
+        // Keep the guarantee that recording more calls will not invalidate
+        // pointers into m_recorded_calls_inputs (see call()).
+        m_recorded_calls_inputs.reserve(max_recorded_calls);
+
+        for (auto& msg : recorded_calls)
+        {
+            if (msg.input_data == nullptr)
+                continue;
+            // Match by pointer identity: messages whose input_data does not
+            // reference the source's input copies are left untouched.
+            for (size_t i = 0; i < other.m_recorded_calls_inputs.size(); ++i)
+            {
+                if (msg.input_data == other.m_recorded_calls_inputs[i].data())
+                {
+                    msg.input_data = m_recorded_calls_inputs[i].data();
+                    break;
+                }
+            }
+        }
+    }
+
+    /// Copy assignment operator.
+    MockedHost& operator=(const MockedHost& other)
+    {
+        *this = MockedHost{other};
+        return *this;
+    }
+
+    MockedHost(MockedHost&&) noexcept = default;
+    MockedHost& operator=(MockedHost&&) noexcept = default;
+
     /// LOG record.
     struct log_record
     {
@@ -359,8 +409,13 @@ public:
 
         const auto n = std::min(buffer_size, code.size() - code_offset);
 
-        if (n > 0)
-            std::copy_n(&code[code_offset], n, buffer_data);
+        if (n == 0)
+            return 0;
+
+        if (buffer_data == nullptr)
+            return 0;
+
+        std::copy_n(&code[code_offset], n, buffer_data);
         return n;
     }
 
@@ -371,6 +426,7 @@ public:
 
         if (recorded_calls.empty())
         {
+            m_recorded_calls_inputs.clear();
             recorded_calls.reserve(max_recorded_calls);
             m_recorded_calls_inputs.reserve(max_recorded_calls);  // Iterators will not invalidate.
         }
@@ -379,14 +435,26 @@ public:
         {
             recorded_calls.emplace_back(msg);
             auto& call_msg = recorded_calls.back();
-            if (call_msg.input_size > 0)
+            if (call_msg.input_data == nullptr || call_msg.input_size == 0)
+            {
+                // Normalize empty input so that no pointer into the caller's
+                // transient buffer is retained.
+                call_msg.input_data = nullptr;
+                call_msg.input_size = 0;
+            }
+            else
             {
                 m_recorded_calls_inputs.emplace_back(call_msg.input_data, call_msg.input_size);
                 const auto& input_copy = m_recorded_calls_inputs.back();
                 call_msg.input_data = input_copy.data();
             }
         }
-        return Result{call_result};
+        auto result = Result{call_result.status_code, call_result.gas_left, call_result.gas_refund,
+                             call_result.output_data, call_result.output_size};
+        const auto* src_storage = qrvmc_get_const_optional_storage(&call_result);
+        auto* dst_storage = qrvmc_get_optional_storage(&result.raw());
+        std::copy_n(src_storage->bytes, sizeof(src_storage->bytes), dst_storage->bytes);
+        return result;
     }
 
     /// Get transaction context (QRVMC host method).
@@ -406,7 +474,22 @@ public:
                   const bytes64 topics[],
                   size_t topics_count) noexcept override
     {
-        recorded_logs.push_back({addr, {data, data_size}, {topics, topics + topics_count}});
+        auto& log = recorded_logs.emplace_back();
+        log.creator = addr;
+
+        if (data_size != 0)
+        {
+            assert(data != nullptr);
+            if (data != nullptr)
+                log.data.assign(data, data + data_size);
+        }
+
+        if (topics_count != 0)
+        {
+            assert(topics != nullptr);
+            if (topics != nullptr)
+                log.topics.assign(topics, topics + topics_count);
+        }
     }
 
     /// Record an account access.
@@ -435,8 +518,8 @@ public:
         record_account_access(addr);
 
         // Accessing precompiled contracts is always warm.
-        if (addr >= "Q00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001"_address &&
-            addr <= "Q00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000009"_address)
+        if (addr >= "Q000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001"_address &&
+            addr <= "Q000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000009"_address)
             return QRVMC_ACCESS_WARM;
 
         return already_accessed ? QRVMC_ACCESS_WARM : QRVMC_ACCESS_COLD;

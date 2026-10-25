@@ -29,7 +29,7 @@ if (WIN32)
 	option(Boost_USE_STATIC_RUNTIME "Link Boost against static C++ runtime libraries" ON)
 endif()
 
-set(BOOST_COMPONENTS "filesystem;unit_test_framework;program_options;system")
+set(BOOST_COMPONENTS "filesystem;unit_test_framework;program_options")
 
 if (WIN32)
 	# Boost 1.77 fixes a bug that causes crashes on Windows for some relative paths in --allow-paths.
@@ -38,6 +38,13 @@ if (WIN32)
 else()
 	# Boost 1.65 is the first to also provide boost::get for rvalue-references (#5787).
 	find_package(Boost 1.65.0 QUIET REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+	# Boost.System is header-only since Boost 1.69, and Boost 1.89 removed its compatibility stub
+	# library, so only older Boost needs it as a compiled component (upstream Solidity db18d42bde).
+	# FindBoost sets Boost_MINOR_VERSION; BoostConfig (Boost 1.70+) does not, so this is false there.
+	if (Boost_MINOR_VERSION LESS 69)
+		list(APPEND BOOST_COMPONENTS system)
+		find_package(Boost 1.65.0 QUIET REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+	endif()
 endif()
 
 # If cmake is older than boost and boost is older than 1.70,

@@ -15,6 +15,7 @@ add_library(qrvmc INTERFACE)
 target_sources(qrvmc INTERFACE
     ${PROJECT_SOURCE_DIR}/test/qrvmc/qrvmc.h
     ${PROJECT_SOURCE_DIR}/test/qrvmc/qrvmc.hpp
+    ${PROJECT_SOURCE_DIR}/test/qrvmc/bytes.hpp
     ${PROJECT_SOURCE_DIR}/test/qrvmc/helpers.h
     ${PROJECT_SOURCE_DIR}/test/qrvmc/utils.h
 )

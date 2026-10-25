@@ -82,7 +82,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: theQRL/qrvmone
-          ref: 46b74c67bba54266d12e7c341bb7f8413e9bce56
+          ref: bf6e26e7e205605be9e17e44fe2b83f0e193f571 # v0.12.1
           path: deps/qrvmone
           submodules: recursive
           persist-credentials: false

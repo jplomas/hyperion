@@ -33,6 +33,10 @@ add_library(range-v3 INTERFACE IMPORTED)
 file(MAKE_DIRECTORY ${RANGE_V3_INCLUDE_DIR})  # Must exist.
 set_target_properties(range-v3 PROPERTIES
     INTERFACE_COMPILE_OPTIONS "\$<\$<CXX_COMPILER_ID:MSVC>:/permissive->"
+    # Temporary workaround for libc++ 22+ (Apple Clang 21+), which no longer defines _LIBCPP_TEMPLATE_VIS used by
+    # range-v3's std forward declarations. Those are only enabled on Apple Clang, so other platforms are unaffected.
+    # TODO: Remove once range-v3 is updated past 0.12.0 (upstream Solidity 52c0a2b7a7).
+    INTERFACE_COMPILE_DEFINITIONS META_NO_STD_FORWARD_DECLARATIONS
     INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ${RANGE_V3_INCLUDE_DIR}
     INTERFACE_INCLUDE_DIRECTORIES ${RANGE_V3_INCLUDE_DIR})
 add_dependencies(range-v3 range-v3-project)
