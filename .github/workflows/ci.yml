@@ -153,7 +153,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: theQRL/qrvmone
-          ref: 46b74c67bba54266d12e7c341bb7f8413e9bce56
+          ref: a9e3c9d87e1bdb41863457335817b205369a53c2 # v0.12.0
           path: deps/qrvmone
           submodules: recursive
           persist-credentials: false
@@ -203,6 +203,49 @@ jobs:
           name: tests-${{ matrix.platform }}
           path: test_results/
           if-no-files-found: ignore
+
+  # The release build above uses a pinned runner, Boost and CMake. This job builds on the newest
+  # macOS runner with Homebrew's current Boost and the runner's CMake, so a new Xcode, libc++, Boost
+  # or CMake breaks here before it reaches a release (CIPH-HYPERION-36). It publishes nothing.
+  macos-latest:
+    name: macOS latest toolchain build and tests
+    runs-on: macos-latest
+    timeout-minutes: 120
+    env:
+      HYPTEST_BINARY: build/test/hyptest
+      HYPTEST_FLAGS: --no-smt
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Install current Boost and Ninja
+        run: brew install boost ninja
+      - name: Show toolchain
+        run: |
+          sw_vers
+          xcrun clang++ --version
+          cmake --version
+          brew list --versions boost ninja
+      - name: Prepare compiler version
+        run: bash scripts/ci/prepare_metadata.sh
+      # Keep this pin equal to the portable job's and linux.yml's, and test/qrvmc on the engine's QRVMC
+      # (see test/qrvmc/README.md).
+      - name: Check out QRVM test engine
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: theQRL/qrvmone
+          ref: a9e3c9d87e1bdb41863457335817b205369a53c2 # v0.12.0
+          path: deps/qrvmone
+          submodules: recursive
+          persist-credentials: false
+      - name: Build QRVM test engine
+        run: bash scripts/ci/build_qrvmone.sh
+      - name: Build compiler
+        run: |
+          export CMAKE_OPTIONS="-G Ninja -DUSE_Z3=OFF -DUSE_CVC4=OFF -DCMAKE_CXX_FLAGS=-Wno-unqualified-std-cast-call"
+          bash scripts/ci/build.sh
+      - name: Compiler tests (default and optimized)
+        run: bash scripts/ci/hyptest_all.sh
 
   emscripten:
     name: WebAssembly build and hypc-js tests

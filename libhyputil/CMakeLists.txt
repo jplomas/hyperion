@@ -46,7 +46,7 @@ set(sources
 )
 
 add_library(hyputil ${sources})
-target_link_libraries(hyputil PUBLIC jsoncpp Boost::boost Boost::filesystem Boost::system range-v3 fmt::fmt-header-only)
+target_link_libraries(hyputil PUBLIC jsoncpp Boost::boost Boost::filesystem $<TARGET_NAME_IF_EXISTS:Boost::system> range-v3 fmt::fmt-header-only)
 target_include_directories(hyputil PUBLIC "${PROJECT_SOURCE_DIR}")
 add_dependencies(hyputil hyperion_BuildInfo.h)
 

@@ -5,10 +5,10 @@ add_executable(yulrun yulrun.cpp)
 target_link_libraries(yulrun PRIVATE yulInterpreter libhypc qrvmasm Boost::boost Boost::program_options)
 
 add_executable(hypfuzzer afl_fuzzer.cpp fuzzer_common.cpp)
-target_link_libraries(hypfuzzer PRIVATE libhypc qrvmasm Boost::boost Boost::program_options Boost::system)
+target_link_libraries(hypfuzzer PRIVATE libhypc qrvmasm Boost::boost Boost::program_options $<TARGET_NAME_IF_EXISTS:Boost::system>)
 
 add_executable(yulopti yulopti.cpp)
-target_link_libraries(yulopti PRIVATE hyperion Boost::boost Boost::program_options Boost::system)
+target_link_libraries(yulopti PRIVATE hyperion Boost::boost Boost::program_options $<TARGET_NAME_IF_EXISTS:Boost::system>)
 
 add_executable(ihyptest
 	ihyptest.cpp

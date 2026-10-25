@@ -44,7 +44,7 @@ enum
      *
      * @see @ref versioning
      */
-    QRVMC_ABI_VERSION = 2
+    QRVMC_ABI_VERSION = 3
 };
 
 
@@ -225,6 +225,10 @@ typedef struct qrvmc_tx_context (*qrvmc_get_tx_context_fn)(struct qrvmc_host_con
  * This callback function is used by a VM to query the hash of the header of the given block.
  * If the information about the requested block is not available, then this is signalled by
  * returning null bytes.
+ *
+ * A 32-byte block hash occupies the lower 32 bytes of the returned value
+ * (bytes of highest indices); the upper 32 bytes are zero, following the same
+ * zero-extension convention as for storage keys.
  *
  * @param context  The pointer to the Host execution context.
  * @param number   The block number.
@@ -490,6 +494,10 @@ typedef bool (*qrvmc_account_exists_fn)(struct qrvmc_host_context* context,
  *
  * This callback function is used by a VM to query the given account storage entry.
  *
+ * A 32-byte storage key occupies the lower 32 bytes of the 64-byte @p key value
+ * (bytes of highest indices); the upper 32 bytes are zero. Hosts hashing into
+ * a 32-byte key space may safely ignore the upper 32 bytes.
+ *
  * @param context  The Host execution context.
  * @param address  The address of the account.
  * @param key      The index of the account's storage entry.
@@ -606,6 +614,8 @@ enum qrvmc_storage_status
  * VM implementations only modify storage of the account of the current execution context
  * (i.e. referenced by qrvmc_message::recipient).
  *
+ * The @p key follows the same zero-extension convention as in ::qrvmc_get_storage_fn.
+ *
  * @param context  The pointer to the Host execution context.
  * @param address  The address of the account.
  * @param key      The index of the storage entry.
@@ -648,6 +658,10 @@ typedef size_t (*qrvmc_get_code_size_fn)(struct qrvmc_host_context* context,
  * This callback function is used by a VM to get the keccak256 hash of the code stored
  * in the account at the given address. For existing accounts not having a code, this
  * function returns keccak256 hash of empty data.
+ *
+ * The 32-byte keccak256 hash occupies the lower 32 bytes of the returned value
+ * (bytes of highest indices); the upper 32 bytes are zero, following the same
+ * zero-extension convention as for storage keys.
  *
  * @param context  The pointer to the Host execution context.
  * @param address  The address of the account.
@@ -857,7 +871,7 @@ enum qrvmc_revision
      *
      * https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/shanghai.md
      */
-    QRVMC_ZOND = 1,
+    QRVMC_ZOND = 0,
 
     /** The maximum QRVM revision supported. */
     QRVMC_MAX_REVISION = QRVMC_ZOND,
