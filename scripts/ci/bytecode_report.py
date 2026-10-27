@@ -99,7 +99,9 @@ def compile_hypcjs(compiler, inputs, workers):
     # Each Node process loads the compiler once and compiles a share of the inputs.
     def compile_chunk(chunk):
         command = ['node', str(ROOT / 'scripts/ci/compile_hypcjs.js'), str(compiler)]
-        return [json.loads(line) for line in run(command, '\n'.join(chunk) + '\n', 3600).splitlines()]
+        output = run(command, '\n'.join(chunk) + '\n', 3600)
+        # Split on \n only: JSON.stringify leaves U+2028, U+2029 and U+0085 unescaped.
+        return [json.loads(line) for line in output.split('\n') if line]
     with ThreadPoolExecutor(workers) as pool:
         chunks = list(pool.map(compile_chunk, [inputs[i::workers] for i in range(workers)]))
     return [chunks[i % workers][i // workers] for i in range(len(inputs))]

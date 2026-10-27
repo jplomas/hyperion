@@ -1,7 +1,8 @@
 version: 2
 updates:
   # Hash-pinned CI tooling (scripts/ci/requirements-*.in), compiled by uv pip compile; Dependabot
-  # recompiles each .txt from its .in with the header's options.
+  # recompiles each .txt from its .in with the header's options. It does not pass --exclude-newer,
+  # so the cooldown covers only the package it bumps: review any pin its pull request adds or raises.
   - package-ecosystem: "uv"
     directory: "/scripts/ci"
     schedule:
