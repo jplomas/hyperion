@@ -1,4 +1,4 @@
-# Python tooling for the linux and portable jobs (test/pyscriptTests.py, cmdline tests, bytecode report).
+# Python tooling for the scripts and lsp jobs (test/pyscriptTests.py, test/lsp.py).
 requests
 parsec
 tabulate
