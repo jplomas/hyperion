@@ -1,0 +1,26 @@
+version: 2
+updates:
+  # Hash-pinned CI tooling (scripts/ci/requirements-*.in), compiled by uv pip compile; Dependabot
+  # recompiles each .txt from its .in with the header's options. It does not pass --exclude-newer,
+  # so the cooldown covers only the package it bumps: review any pin its pull request adds or raises.
+  - package-ecosystem: "uv"
+    directory: "/scripts/ci"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    ignore:
+      # scripts/run_proofs.sh reruns only changed proofs, so a solver bump would pass CI without
+      # running test/formal; bump it by hand and run every proof.
+      - dependency-name: "z3-solver"
+    commit-message:
+      prefix: "deps"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "ci"

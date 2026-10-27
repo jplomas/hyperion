@@ -15,6 +15,13 @@ on:
       run-smt:
         type: boolean
         default: true
+    outputs:
+      sha256_amd64:
+        description: SHA-256 of the amd64 release binary, set by the gcc build
+        value: ${{ jobs.linux.outputs.sha256_amd64 }}
+      sha256_arm64:
+        description: SHA-256 of the arm64 release binary, set by the gcc build
+        value: ${{ jobs.linux.outputs.sha256_arm64 }}
 
 permissions:
   contents: read
@@ -31,6 +38,9 @@ jobs:
     defaults:
       run:
         shell: bash
+    outputs:
+      sha256_amd64: ${{ steps.release.outputs.sha256_amd64 }}
+      sha256_arm64: ${{ steps.release.outputs.sha256_arm64 }}
     env:
       CC: ${{ inputs.compiler == 'clang' && 'clang' || 'gcc' }}
       CXX: ${{ inputs.compiler == 'clang' && 'clang++' || 'g++' }}
@@ -46,14 +56,12 @@ jobs:
           persist-credentials: false
       - name: Trust checkout in container
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      - name: Install test tools
+      # No PyPI packages in a release-building job (CIPH-HYPERION-31): the command-line tests and the
+      # bytecode report use only the standard library, and ci.yml's lsp job runs the language server tests.
+      - name: Install build tools
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends ccache python3-pip
-          # Hash-pinned: the build backend first, then the rest without build isolation so the
-          # sdist-only parsec cannot fetch unpinned build tools (scripts/ci/requirements-*.in).
-          python3 -m pip install --require-hashes -r scripts/ci/requirements-build.txt
-          python3 -m pip install --require-hashes --no-build-isolation -r scripts/ci/requirements-tests.txt
+          apt-get install -y --no-install-recommends ccache python3
       - name: Install ARM64 build dependencies
         if: inputs.architecture == 'arm64'
         run: |
@@ -109,8 +117,6 @@ jobs:
             test_args+=(--no-smt)
           fi
           bash test/cmdlineTests.sh "${test_args[@]}"
-      - name: Language server tests
-        run: python3 test/lsp.py build/hypc/hypc --non-interactive
       - name: Generate bytecode comparison
         if: inputs.sanitizer == ''
         run: python3 scripts/ci/bytecode_report.py build/hypc/hypc "reports/${PLATFORM}.json"
@@ -122,9 +128,11 @@ jobs:
           path: reports/*.json
           if-no-files-found: error
       - name: Prepare Linux release binary
+        id: release
         if: inputs.compiler == 'gcc' && inputs.sanitizer == ''
         env:
           EXPECTED_MACHINE: ${{ inputs.architecture == 'arm64' && 'AArch64' || 'Advanced Micro Devices X86-64' }}
+          ARCHITECTURE: ${{ inputs.architecture }}
         run: |
           mkdir -p release
           cp build/hypc/hypc "release/$RELEASE_ASSET"
@@ -136,6 +144,8 @@ jobs:
             echo 'Release binary unexpectedly depends on an unbundled runtime library.' >&2
             exit 1
           fi
+          # Only this job sets its outputs; ci.yml's bytecode and release jobs check the artifact against it.
+          echo "sha256_$ARCHITECTURE=$(sha256sum "release/$RELEASE_ASSET" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
       - name: Upload Linux release binary
         if: inputs.compiler == 'gcc' && inputs.sanitizer == ''
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
