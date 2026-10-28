@@ -144,8 +144,21 @@ void MemoryItem::setToZero(SourceLocation const&, bool _removeReference) const
 	CompilerUtils utils(m_context);
 	hypAssert(_removeReference, "");
 	utils.pushZeroValue(*m_dataType);
-	utils.storeInMemoryDynamic(*m_dataType, m_padded);
-	m_context << Instruction::POP;
+	// stack pre: reference 0
+	if (!m_padded)
+	{
+		hypUnimplementedAssert(
+			m_dataType->calldataEncodedSize(/* _padded */ false) == 1,
+			"Zeroing of multi-byte non-padded types is not implemented."
+		);
+		hypAssert(m_dataType->category() != Type::Category::UserDefinedValueType);
+		m_context << Instruction::SWAP1 << Instruction::MSTORE8;
+	}
+	else
+	{
+		utils.storeInMemoryDynamic(*m_dataType, m_padded);
+		m_context << Instruction::POP;
+	}
 }
 
 
