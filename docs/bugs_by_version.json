@@ -1,1 +1,60 @@
-{}
+{
+    "0.0.1": {
+        "bugs": [
+            "DepositRootStorageArgumentReadAfterLaterArguments",
+            "ReturndatacopyWithStaleSizeRemoved",
+            "UnsetPackedInternalFunctionPointerJumpsToZero",
+            "ConstantEvaluatedInFirstUseArithmeticMode",
+            "YulOptimizerKnowledgeBaseStaleBookkeeping",
+            "MemoryByteArrayElementDeleteClearsWholeWord",
+            "SpillSlotCollisionAcrossMutualRecursion",
+            "UnsoundSpillInMutualRecursion",
+            "LostStorageArrayWriteOnSlotOverflow"
+        ],
+        "released": "2025-02-20"
+    },
+    "0.0.2": {
+        "bugs": [
+            "DepositRootStorageArgumentReadAfterLaterArguments",
+            "ReturndatacopyWithStaleSizeRemoved",
+            "UnsetPackedInternalFunctionPointerJumpsToZero",
+            "ConstantEvaluatedInFirstUseArithmeticMode",
+            "YulOptimizerKnowledgeBaseStaleBookkeeping",
+            "MemoryByteArrayElementDeleteClearsWholeWord",
+            "SpillSlotCollisionAcrossMutualRecursion",
+            "UnsoundSpillInMutualRecursion",
+            "LostStorageArrayWriteOnSlotOverflow"
+        ],
+        "released": "2025-02-21"
+    },
+    "0.1.0": {
+        "bugs": [
+            "DepositRootStorageArgumentReadAfterLaterArguments",
+            "ReturndatacopyWithStaleSizeRemoved",
+            "UnsetPackedInternalFunctionPointerJumpsToZero",
+            "ConstantEvaluatedInFirstUseArithmeticMode",
+            "YulOptimizerKnowledgeBaseStaleBookkeeping",
+            "MemoryByteArrayElementDeleteClearsWholeWord",
+            "SpillSlotCollisionAcrossMutualRecursion",
+            "UnsoundSpillInMutualRecursion",
+            "LostStorageArrayWriteOnSlotOverflow"
+        ],
+        "released": "2025-02-22"
+    },
+    "0.2.0": {
+        "bugs": [
+            "DepositRootStorageArgumentReadAfterLaterArguments",
+            "ReturndatacopyWithStaleSizeRemoved",
+            "UnsetPackedInternalFunctionPointerJumpsToZero",
+            "ConstantEvaluatedInFirstUseArithmeticMode",
+            "LegacyUint256DirtyUpperBits",
+            "YulOptimizerKnowledgeBaseStaleBookkeeping",
+            "VerifierStorageArgumentCopiedAfterLaterArguments",
+            "MemoryByteArrayElementDeleteClearsWholeWord",
+            "SpillSlotCollisionAcrossMutualRecursion",
+            "UnsoundSpillInMutualRecursion",
+            "LostStorageArrayWriteOnSlotOverflow"
+        ],
+        "released": "2026-10-19"
+    }
+}

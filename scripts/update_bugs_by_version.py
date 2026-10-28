@@ -2,12 +2,15 @@
 #
 # This script is used to generate the list of bugs per compiler version
 # from the list of bugs.
-# It updates the list in place and signals failure if there were changes.
-# This makes it possible to use this script as part of CI to check
-# that the list is up to date.
+# It updates the list in place. The command-line test
+# test/cmdlineTests/~update_bugs_by_version runs it and fails if the list
+# changed, which checks in CI that the list is up to date.
+# A bug without "fixed" is not fixed in any release yet and is listed for
+# every version from "introduced" on.
 
 import json
 import re
+import sys
 from pathlib import Path
 
 def comp(version_string):
@@ -25,12 +28,15 @@ with (root_path / 'Changelog.md').open(encoding='utf8') as changelog:
             versions[m.group(1)] = {}
             versions[m.group(1)]['released'] = m.group(2)
 
+if not versions:
+    sys.exit('No released versions in Changelog.md: expected headings such as "### 0.2.0 (2026-10-19)".')
+
 for key, value in versions.items():
     value['bugs'] = []
     for bug in bugs:
         if 'introduced' in bug and comp(bug['introduced']) > comp(key):
             continue
-        if comp(bug['fixed']) <= comp(key):
+        if 'fixed' in bug and comp(bug['fixed']) <= comp(key):
             continue
         value['bugs'] += [bug['name']]
 
@@ -39,4 +45,4 @@ for key, value in versions.items():
     sort_keys=True,
     indent=4,
     separators=(',', ': ')
-), encoding='utf8')
+) + '\n', encoding='utf8')
