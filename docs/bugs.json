@@ -11,7 +11,7 @@
         "uid": "HYP-2026-10",
         "name": "ReturndatacopyWithStaleSizeRemoved",
         "summary": "The Yul optimizer can remove a ``returndatacopy`` whose length is the result of an earlier ``returndatasize()`` call even after another call has changed the return data, so a copy that has to revert does not.",
-        "description": "The ``UnusedStoreEliminator`` optimizer step removes stores whose result is never read. It treats ``returndatacopy(destination, 0, size)`` as removable when ``size`` holds the result of a ``returndatasize()`` call, because such a copy cannot revert. If another external call runs between the ``returndatasize()`` call and the copy and returns less data, the copy has to revert, and removing it lets execution continue. Only inline assembly that keeps the result of ``returndatasize()`` across another call and never reads the copied memory is affected. The compiler does not generate this pattern itself. Unoptimized code is unaffected.",
+        "description": "The ``UnusedStoreEliminator`` optimizer step removes stores whose result is never read. It treats ``returndatacopy(destination, 0, size)`` as removable when ``size`` holds the result of a ``returndatasize()`` call, because such a copy cannot revert. If another external call runs between the ``returndatasize()`` call and the copy and returns less data, the copy has to revert, and removing it lets execution continue. Only inline assembly or stand-alone Yul that keeps the result of ``returndatasize()`` across another call and never reads the copied memory is affected. The compiler does not generate this pattern itself. Unoptimized code is unaffected.",
         "introduced": "0.0.1",
         "severity": "low",
         "conditions": {
