@@ -40,11 +40,11 @@ Please include steps to reproduce the bug you have found in as much detail as po
 Once we have received your bug report, we will try to reproduce it and provide a more detailed response.
 Once the reported bug has been successfully reproduced, the Hyperion team will work on a fix.
 
-The Hyperion team maintains the following JSON-formatted lists of patched security vulnerabilities:
+The Hyperion team maintains the following JSON-formatted lists of known security vulnerabilities, including those no release has fixed yet:
 
 - [Summary of known security vulnerabilities][3]
 - [List of security vulnerabilities affecting a specific version of the compiler][4].
 
 
 [3]: docs/bugs.rst
-[4]: https://github.com/theQRL/hyperion/blob/develop/docs/bugs_by_version.json
+[4]: https://github.com/theQRL/hyperion/blob/main/docs/bugs_by_version.json

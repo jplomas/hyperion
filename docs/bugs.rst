@@ -8,12 +8,12 @@ List of Known Bugs
 
 Below, you can find a JSON-formatted list of some of the known security-relevant bugs in the
 Hyperion compiler. The file itself is hosted in the `Github repository
-<https://github.com/theQRL/hyperion/blob/develop/docs/bugs.json>`_.
-The list stretches back as far as version 0.3.0, bugs known to be present only
-in versions preceding that are not listed.
+<https://github.com/theQRL/hyperion/blob/main/docs/bugs.json>`_.
+The list covers every Hyperion release from 0.0.1, including the bugs Hyperion
+inherited from Solidity 0.8.23, the version it was forked from.
 
 There is another file called `bugs_by_version.json
-<https://github.com/theQRL/hyperion/blob/develop/docs/bugs_by_version.json>`_,
+<https://github.com/theQRL/hyperion/blob/main/docs/bugs_by_version.json>`_,
 which can be used to check which bugs affect a specific version of the compiler.
 
 Contract source verification tools and also other tools interacting with
@@ -48,7 +48,9 @@ link
 introduced
     The first published compiler version that contained the bug, optional
 fixed
-    The first published compiler version that did not contain the bug anymore
+    The first published compiler version that did not contain the bug anymore.
+    Absent while no release fixes the bug, which then affects every version
+    from ``introduced`` on.
 publish
     The date at which the bug became known publicly, optional
 severity
@@ -60,10 +62,15 @@ conditions
     keys can be used:
     ``optimizer``, Boolean value which
     means that the optimizer has to be switched on to enable the bug.
+    ``yulOptimizer``, Boolean value which means that the Yul optimizer
+    has to be switched on to enable the bug.
+    ``viaIR``, Boolean value which means that the bug is present only when
+    compiling via IR (``true``) or only with the legacy code generator
+    (``false``).
     ``qrvmVersion``, a string that indicates which QRVM version compiler
     settings trigger the bug. The string can contain comparison
-    operators. For example, ``">=constantinople"`` means that the bug
-    is present when the QRVM version is set to ``constantinople`` or
+    operators. For example, ``">=zond"`` means that the bug
+    is present when the QRVM version is set to ``zond`` or
     later.
     If no conditions are given, assume that the bug is present.
 check

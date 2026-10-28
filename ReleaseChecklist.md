@@ -43,9 +43,10 @@ At least a day before the release:
 
 ### Changelog
  - [ ] Sort the changelog entries alphabetically and correct any errors you notice. Commit it.
- - [ ] Update the changelog to include a release date.
+ - [ ] Rename ``### Unreleased`` to ``### <version> (<YYYY-MM-DD>)``, the heading form ``scripts/update_bugs_by_version.py`` reads, and start a new ``### Unreleased`` section above it.
+ - [ ] In ``docs/bugs.json``, set ``fixed`` to the new version on every bug this release fixes, and add an entry for any bug it fixes that is not listed yet.
  - [ ] Run ``scripts/update_bugs_by_version.py`` to regenerate ``bugs_by_version.json`` from the changelog and ``bugs.json``.
-       Make sure that the resulting ``bugs_by_version.json`` has a new, empty entry for the new version.
+       Make sure that the entry for the new version lists exactly the known bugs the release still contains.
  - [ ] Commit changes, create a pull request and wait for the tests. Then merge it.
  - [ ] Copy the changelog into the release blog post.
 
