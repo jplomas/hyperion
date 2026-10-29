@@ -1,5 +1,8 @@
 ### Unreleased
 
+Important Bugfixes:
+ * Code Generator: Fix `delete` applied to an element of a `bytes` array in memory zeroing the whole 64-byte word starting at the element's location instead of only the element's byte, in the legacy code generator (upstream SOL-2026-5).
+
 Bugfixes:
  * Code Generator: Convert `mldsa87verify` and `xmssverify` arguments in evaluation order in the IR code generator, so a storage `bytes` argument is copied to memory before later arguments can modify it, as the legacy code generator and the SMTChecker already do.
 
