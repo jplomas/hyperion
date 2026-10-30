@@ -178,6 +178,8 @@ private:
 	struct State
 	{
 		/// Current values of variables, always movable.
+		/// A value never references the variable it is assigned to, and is cleared as soon as
+		/// a variable it references changes (see clearValues). The knowledge base relies on this.
 		std::map<YulString, AssignedValue> value;
 		/// m_references[a].contains(b) <=> the current expression assigned to a references b
 		std::unordered_map<YulString, std::set<YulString>> references;

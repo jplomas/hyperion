@@ -127,6 +127,28 @@ BOOST_AUTO_TEST_CASE(difference)
 	);
 }
 
+BOOST_AUTO_TEST_CASE(variable_changed)
+{
+	yul::KnowledgeBase kb = constructKnowledgeBase(R"({
+		let t := calldataload(0)
+		let a := add(t, 1)
+		let c := add(a, 1)
+	})");
+
+	BOOST_CHECK(kb.differenceIfKnownConstant("c"_yulstring, "t"_yulstring) == u512(2));
+
+	// `t` changes, but `a` and `c` still hold values computed from its old value.
+	// Like the DataFlowAnalyzer, forget the value of `a`, since it references `t` directly.
+	kb.variableChanged("t"_yulstring);
+	m_values.erase("a"_yulstring);
+
+	// Queries `c` first, so its cached offset relative to the old `t` is used.
+	BOOST_CHECK(!kb.differenceIfKnownConstant("c"_yulstring, "t"_yulstring));
+	BOOST_CHECK(!kb.differenceIfKnownConstant("t"_yulstring, "c"_yulstring));
+	BOOST_CHECK(!kb.knownToBeDifferent("c"_yulstring, "t"_yulstring));
+	BOOST_CHECK(kb.differenceIfKnownConstant("c"_yulstring, "a"_yulstring) == u512(1));
+}
+
 BOOST_AUTO_TEST_CASE(literalsAbove256Bits)
 {
 	string const twoTo256 = "115792089237316195423570985008687907853269984665640564039457584007913129639936";
