@@ -275,6 +275,12 @@ YulOptimizerTestCommon::YulOptimizerTestCommon(
 			ExpressionJoiner::run(*m_context, *m_ast);
 			ExpressionJoiner::run(*m_context, *m_ast);
 		}},
+		{"loadResolverSolo", [&]() {
+			disambiguate();
+			ForLoopInitRewriter::run(*m_context, *m_ast);
+
+			LoadResolver::run(*m_context, *m_ast);
+		}},
 		{"loopInvariantCodeMotion", [&]() {
 			disambiguate();
 			ForLoopInitRewriter::run(*m_context, *m_ast);

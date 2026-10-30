@@ -363,6 +363,12 @@ void DataFlowAnalyzer::clearValues(std::set<YulString> _variables)
 		m_state.value.erase(name);
 		m_state.references.erase(name);
 	}
+
+	// Only the variables to clear changed. The values of the referencing variables did not
+	// change, we just forgot their expressions because we can no longer evaluate them.
+	// What the knowledge base computed for them is still valid though.
+	for (auto const& name: _variables)
+		m_knowledgeBase.variableChanged(name);
 }
 
 void DataFlowAnalyzer::assignValue(YulString _variable, Expression const* _value)
